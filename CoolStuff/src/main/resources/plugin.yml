@@ -1,0 +1,18 @@
+name: ${project.artifactId}
+main: com.dayton.coolstuff.CoolStuff
+version: ${project.version}
+authors: [Dayton]
+commands:
+  home:
+  sethome:
+  delhome:
+  warp:
+  setwarp:
+  delwarp:
+  socialspy:
+  top:
+  near:
+  message:
+    aliases: [msg, m]
+  reply:
+    aliases: [r]
