@@ -7,29 +7,46 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import com.earth2me.essentials.Essentials;
+import com.oracle.jrockit.jfr.EventDefinition;
+import net.minecraft.server.v1_9_R1.NBTTagCompound;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.boss.BarColor;
+import org.bukkit.boss.BarFlag;
+import org.bukkit.boss.BarStyle;
+import org.bukkit.boss.BossBar;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Creeper;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
+import org.bukkit.craftbukkit.v1_9_R1.inventory.CraftItemStack;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.material.MaterialData;
+import org.bukkit.material.SpawnEgg;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.dayton.coolstuff.message.MessageCommand;
 
 import net.md_5.bungee.api.ChatColor;
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class CoolStuff extends JavaPlugin implements Listener {
 
     public static CoolStuff plugin;
+    public static Essentials ess;
 
     private List<String> socialspy = new ArrayList<>();
 
@@ -41,6 +58,7 @@ public class CoolStuff extends JavaPlugin implements Listener {
 
     public void onEnable() {
         plugin = this;
+        ess = (Essentials) getServer().getPluginManager().getPlugin("Essentials");
         saveDefaultConfig();
 
         getServer().getPluginManager().registerEvents(new HomingBow(), this);
@@ -309,7 +327,7 @@ public class CoolStuff extends JavaPlugin implements Listener {
             int count = 0;
             for (Entity e : p.getWorld().getEntities()) {
                 if (p.getLocation().distance(e.getLocation()) <= maxDist) {
-                    if (e instanceof Player) {
+                    if (e instanceof Creeper) {
                         if (e.isDead() || e.getName() == p.getName())
                             continue;
                         double dist = p.getLocation().distance(e.getLocation());
@@ -346,6 +364,38 @@ public class CoolStuff extends JavaPlugin implements Listener {
                     }
                     player.sendMessage(msg);
                 }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onEggClick(final PlayerInteractEvent e) {
+        if (e.getAction() == Action.RIGHT_CLICK_AIR) {
+            if (e.getItem().getType() == Material.MONSTER_EGG) {
+                final String type = Util.getFriendlyName(e.getItem(), true).toUpperCase();
+                final ItemStack item = e.getItem().clone();
+                item.setAmount(1);
+
+                final Item egg = e.getPlayer().getWorld().dropItem(e.getPlayer().getEyeLocation(), item);
+                egg.setVelocity(e.getPlayer().getEyeLocation().getDirection().multiply(2));
+                if (e.getPlayer().getGameMode() != GameMode.CREATIVE) {
+                    if (e.getItem().getAmount() > 1) {
+                        e.getItem().setAmount(e.getItem().getAmount() - 1);
+                    } else {
+                        e.getPlayer().getInventory().remove(e.getItem());
+                    }
+                    e.getPlayer().updateInventory();
+                }
+
+                new BukkitRunnable() {
+                    public void run() {
+                        if (egg.isOnGround()) {
+                            e.getPlayer().getWorld().spawnEntity(egg.getLocation(), EntityType.valueOf(type.split(" ")[1]));
+                            egg.remove();
+                            cancel();
+                        }
+                    }
+                }.runTaskTimer(this, 0, 3);
             }
         }
     }
