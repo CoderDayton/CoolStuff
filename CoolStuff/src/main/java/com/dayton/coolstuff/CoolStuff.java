@@ -14,6 +14,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -303,7 +304,7 @@ public class CoolStuff extends JavaPlugin implements Listener {
         if (cmd.getName().equalsIgnoreCase("near")) {
             int maxDist = 200;
             StringBuilder b = new StringBuilder();
-            DecimalFormat f = new DecimalFormat("##");
+            DecimalFormat f = new DecimalFormat("###");
             b.append("§6Players nearby: ");
             int count = 0;
             for (Entity e : p.getWorld().getEntities()) {
@@ -312,16 +313,15 @@ public class CoolStuff extends JavaPlugin implements Listener {
                         if (e.isDead() || e.getName() == p.getName())
                             continue;
                         double dist = p.getLocation().distance(e.getLocation());
-                        b.append(ChatColor.values()[new Random().nextInt(ChatColor.values().length)] + e.getName() + "§7(§6" + f.format(dist) + "m§7)");
-                        if (b.length() < 1) {
-                            b.append("§7, ");
-                        }
+                        b.append("§r" + e.getName() + "§7(§6" + f.format(dist) + "m§7)").append("§7, ");
+                        count++;
                     }
-                    count++;
                 }
             }
             if (count == 0) {
-                b.append("none");
+                b.append("§rnone");
+            } else {
+                b.deleteCharAt(b.lastIndexOf(","));
             }
             p.sendMessage(b.toString());
         }
