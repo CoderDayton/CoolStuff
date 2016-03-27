@@ -393,7 +393,7 @@ public class CoolStuff extends JavaPlugin implements Listener {
                             e.getPlayer().getWorld().spawnEntity(egg.getLocation(), EntityType.valueOf(type.split(" ")[1]));
                             egg.remove();
                             cancel();
-                            e.getPlayer().sendMessage("fuck");
+                            // TESTING
                         }
                     }
                 }.runTaskTimer(this, 0, 3);
